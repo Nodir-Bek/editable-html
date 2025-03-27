@@ -27,10 +27,25 @@ function extractVideoId(url: string) {
   }
 }
 
-const HtmlEditor: React.FC = () => {
+interface HtmlEditorProps {
+  initialValue?: string;
+  handleSave?: (content: string) => void;
+}
+
+const HtmlEditor: React.FC<HtmlEditorProps> = ({
+  initialValue = "",
+  handleSave,
+}) => {
   const editorRef = useRef<HTMLDivElement>(null);
   const [htmlContent, setHtmlContent] = useState<string>("");
   const [inlineContent, setInlineContent] = useState<string>("");
+
+  useEffect(() => {
+    if (editorRef.current && initialValue) {
+      editorRef.current.innerHTML = initialValue;
+      setHtmlContent(initialValue);
+    }
+  }, [initialValue]);
 
   const formatText = (tag: string, attributes?: string) => {
     document.execCommand(tag, false, attributes);
@@ -140,7 +155,7 @@ const HtmlEditor: React.FC = () => {
     startHeight: 0,
   });
 
-  const [isResizing, setIsResizing] = useState(false);
+  // const [isResizing, setIsResizing] = useState(false);
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
@@ -160,7 +175,7 @@ const HtmlEditor: React.FC = () => {
         startWidth: 0,
         startHeight: 0,
       });
-      setIsResizing(false);
+      // setIsResizing(false);
       updateHtmlContent();
     };
     document.addEventListener("mousemove", handleMouseMove);
@@ -254,7 +269,10 @@ const HtmlEditor: React.FC = () => {
   const saveContent = () => {
     const styledHtml = addInlineStyles(htmlContent);
     setInlineContent(styledHtml);
-    alert("Content saved with inline styles!");
+    if (handleSave) {
+      handleSave(styledHtml);
+    }
+    console.log("styledHtml", styledHtml);
   };
 
   return (
